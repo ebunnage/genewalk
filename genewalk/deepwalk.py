@@ -165,18 +165,24 @@ def run_single_walk(start_node, graph, length, p=1, q=1):
         A path of the given length, with each element corresponding to a node
         along the path.
     """
-    path = [start_node]
+    path = [None, start_node]
     for i in range(1, length):
-        neighbors = list(graph[path[-1]])
-        weights = \
-            np.array([1/p if n == path[-1]
-                     else (1/q if graph.has_edge(n, path[-1])
-                           else 1)
-                     for n in neighbors])
-        p = weights / sum(weights)
-        next_node = np.random.choice(neighbors, p=p)
+        neighbors, probs = get_neighbors_probs(graph, path[-1], path[-2], p, q)
+        next_node = np.random.choice(neighbors, p=probs)
         path.append(next_node)
+    path = path[1:]
     return path
+
+
+def get_neighbors_probs(graph, current_node, last_node, p, q):
+    neighbors = list(graph[current_node])
+    weights = \
+        [(1/p if (n == last_node)
+          else (1/q if graph.has_edge(last_node, n)
+                else 1))
+         for n in neighbors]
+    probs = np.array(weights) / np.sum(weights)
+    return neighbors, probs
 
 
 def get_start_nodes(graph, niter):
