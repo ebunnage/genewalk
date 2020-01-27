@@ -47,7 +47,7 @@ class DeepWalk(object):
         self.niter = niter
         self.model = None
 
-    def get_walks(self, workers=1):
+    def get_walks(self, workers=1, p=1, q=1):
         """Generates walks (sentences) sampled by an (unbiased) random walk
         over the networkx MultiGraph.
 
@@ -57,6 +57,12 @@ class DeepWalk(object):
             The number of workers to use when running random walks. If greater
             than 1, multiprocessing is used to speed up random walk generation.
             Default: 1
+        p : Optional[float]
+            A strictly positive value that governs the "return" rate
+            of the random walk. Default: 1
+        q : Optional[float]
+            A strictly positive value that governs the "in-out" exploration
+            rate of the random walk. Default: 1
         """
         logger.info('Running random walks...')
         self.walks = []
@@ -66,7 +72,7 @@ class DeepWalk(object):
         if workers == 1:
             for count, node in enumerate(nodes):
                 walks = run_walks_for_node(node, self.graph, self.niter,
-                                           self.wl)
+                                           self.wl, p, q)
                 self.walks.extend(walks)
                 if (count + 1) % 100 == 0:
                     logger.info('Walks for %d/%d nodes complete in %.2fs' %
@@ -78,7 +84,7 @@ class DeepWalk(object):
             chunk_size = int(float(0.9*len(start_nodes))/workers)
             walk_fun = functools.partial(run_single_walk,
                                          graph=self.graph,
-                                         length=self.wl)
+                                         length=self.wl, p=p, q=q)
             for count, res in enumerate(
                     pool.imap_unordered(walk_fun, start_nodes,
                                         chunksize=chunk_size)):
@@ -192,7 +198,7 @@ def get_start_nodes(graph, niter):
     return start_nodes
 
 
-def run_walks_for_node(node, graph, niter, walk_length):
+def run_walks_for_node(node, graph, niter, walk_length, p=1, q=1):
     """Run all random walks starting from a given node.
 
     Parameters
@@ -205,6 +211,12 @@ def run_walks_for_node(node, graph, niter, walk_length):
         The number of iterations to run for gene nodes.
     walk_length : int
         The length of the walk.
+    p : Optional[float]
+        A strictly positive value that governs the "return" rate
+        of the random walk. Default: 1
+    q : Optional[float]
+        A strictly positive value that governs the "in-out" exploration
+        rate of the random walk. Default: 1
 
     Returns
     -------
@@ -213,12 +225,12 @@ def run_walks_for_node(node, graph, niter, walk_length):
     """
     walks = []
     for _ in range(niter * len(graph[node])):
-        walk = run_single_walk(node, graph, walk_length)
+        walk = run_single_walk(node, graph, walk_length, p, q)
         walks.append(walk)
     return walks
 
 
-def run_walks(graph, **kwargs):
+def run_walks(graph, p=1, q=1, **kwargs):
     """Run random walks and get node vectors on a given graph.
 
     Parameters
@@ -226,6 +238,12 @@ def run_walks(graph, **kwargs):
     graph : networkx.MultiGraph
         The graph on which random walks are going to be run and node vectors
         calculated.
+    p : Optional[float]
+        A strictly positive value that governs the "return" rate
+        of the random walk. Default: 1
+    q : Optional[float]
+        A strictly positive value that governs the "in-out" exploration
+        rate of the random walk. Default: 1
     **kwargs
         Key word arguments passed as the arguments of the DeepWalk constructor,
         ass well as the get_walks method and the word2vec method. See the
