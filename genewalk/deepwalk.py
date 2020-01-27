@@ -5,9 +5,9 @@ implements a method to run a given number of walks and save the walks as an
 attribute of the instance.
 """
 import time
-import random
 import logging
 import functools
+import numpy as np
 import networkx as nx
 import multiprocessing
 from gensim.models import Word2Vec
@@ -141,7 +141,7 @@ class DeepWalk(object):
                     % (end - start))
 
 
-def run_single_walk(start_node, graph, length):
+def run_single_walk(start_node, graph, length, p=1, q=1):
     """Run a single random walk on a graph from a given start node.
 
     Parameters
@@ -152,6 +152,12 @@ def run_single_walk(start_node, graph, length):
         The identifier of the node from which the random walk starts.
     length : int
         The length of the random walk.
+    p : Optional[float]
+        A strictly positive value that governs the "return" rate
+        of the random walk. Default: 1
+    q : Optional[float]
+        A strictly positive value that governs the "in-out" exploration
+        rate of the random walk. Default: 1
 
     Returns
     -------
@@ -161,8 +167,15 @@ def run_single_walk(start_node, graph, length):
     """
     path = [start_node]
     for i in range(1, length):
-        start_node = random.choice(list(graph[start_node]))
-        path.append(start_node)
+        neighbors = list(graph[path[-1]])
+        weights = \
+            np.array([1/p if n == path[-1]
+                     else (1/q if graph.has_edge(n, path[-1])
+                           else 1)
+                     for n in neighbors])
+        p = weights / sum(weights)
+        next_node = np.random.choice(neighbors, p=p)
+        path.append(next_node)
     return path
 
 
