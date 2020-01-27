@@ -129,6 +129,16 @@ def main():
                              'be used if the goal is to deterministically '
                              'reproduce a prior result obtained with the same '
                              'random seed.')
+    parser.add_argument('--n2v_p', default=1.0, type=float,
+                        help='If provided, the random walk is done using '
+                             'biased sampling according to the node2vec '
+                             'algorithm, with this parameter governing '
+                             'the "return" rate of the random walk.')
+    parser.add_argument('--n2v_q', default=1.0, type=float,
+                        help='If provided, the random walk is done using '
+                             'biased sampling according to the node2vec '
+                             'algorithm, with this parameter governing '
+                             'the "in-out" rate of the random walk.')
     args = parser.parse_args()
 
     # Now we run the relevant stage of processing
@@ -158,7 +168,8 @@ def main():
         save_pickle(MG.graph, project_folder, 'multi_graph')
         for i in range(args.nreps_graph):
             logger.info('%s/%s' % (i + 1, args.nreps_graph))
-            DW = run_walks(MG.graph, workers=args.nproc)
+            DW = run_walks(MG.graph, workers=args.nproc,
+                           p=args.n2v_p, q=args.n2v_q)
 
             # Pickle the node vectors (embeddings) and DW object
             if args.save_dw:
@@ -177,7 +188,8 @@ def main():
         for i in range(args.nreps_null):
             logger.info('%s/%s' % (i + 1, args.nreps_null))
             RG = get_rand_graph(MG)
-            DW = run_walks(RG, workers=args.nproc)
+            DW = run_walks(RG, workers=args.nproc,
+                           p=args.n2v_p, q=args.n2v_q)
 
             # Pickle the node vectors (embeddings) and DW object
             if args.save_dw:
