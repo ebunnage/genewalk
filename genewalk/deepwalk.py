@@ -178,8 +178,8 @@ def get_neighbors_probs(graph, current_node, last_node, p, q):
     neighbors = list(graph[current_node])
     weights = \
         [(1/p if (n == last_node)
-          else (1/q if graph.has_edge(last_node, n)
-                else 1))
+          else (1 if graph.has_edge(last_node, n)
+                else 1/q))
          for n in neighbors]
     probs = np.array(weights) / np.sum(weights)
     return neighbors, probs
