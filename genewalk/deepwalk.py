@@ -264,6 +264,6 @@ def run_walks(graph, p=1, q=1, **kwargs):
     dw_args = {'walk_length': kwargs.pop('walk_length', default_walk_length),
                'niter': kwargs.pop('niter', default_niter)}
     DW = DeepWalk(graph, **dw_args)
-    DW.get_walks(kwargs.get('workers', 1))
+    DW.get_walks(kwargs.get('workers', 1), p=p, q=q)
     DW.word2vec(**kwargs)
     return DW
