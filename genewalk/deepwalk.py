@@ -181,12 +181,18 @@ def run_single_walk(start_node, graph, length, p=1, q=1):
 
 
 def get_neighbors_probs(graph, current_node, last_node, p, q):
+    # Get the list of neighbor nodes
     neighbors = list(graph[current_node])
+    # For each neighbor node, calculate the weights as follows:
+    # - 1/p if it is the node we visited last
+    # - 1/q if it is not the last node and is not connected to the last node
+    # - 1 otherwise (i.e., a node that is connected to the last node)
     weights = \
         [(1/p if (n == last_node)
           else (1 if graph.has_edge(last_node, n)
                 else 1/q))
          for n in neighbors]
+    # Now normalize the weights to sum to one
     probs = np.array(weights) / np.sum(weights)
     return neighbors, probs
 

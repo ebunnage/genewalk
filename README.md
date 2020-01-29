@@ -53,7 +53,7 @@ genewalk [-h] [--version] --project PROJECT --genes GENES --id_type
               [--network_source {pc,indra,edge_list,sif}]
               [--network_file NETWORK_FILE] [--nproc NPROC] [--nreps NREPS]
               [--alpha_fdr ALPHA_FDR] [--save_dw SAVE_DW]
-              [--random_seed RANDOM_SEED]
+              [--random_seed RANDOM_SEED] [--n2v_p N2V_P] [--n2v_q N2V_Q]
 
 
 required arguments:
@@ -63,7 +63,7 @@ required arguments:
                         final results are written. Must contain only
                         characters that are valid in folder names.
   --genes GENES         Path to a text file with a list of differentially
-                        expressed genes. Thetype of gene identifiers used in
+                        expressed genes. The type of gene identifiers used in
                         the text file are provided in the id_type argument.
   --id_type {hgnc_symbol,hgnc_id,ensembl_id,mgi_id}
                         The type of gene IDs provided in the text file in the
@@ -78,7 +78,7 @@ optional arguments:
                         result files for a given project. Default:
                         ~/genewalk
   --network_source {pc,indra,edge_list,sif}
-                        The source of the network to be used.Possible values
+                        The source of the network to be used. Possible values
                         are: pc, indra, edge_list, and sif. In case of indra,
                         edge_list, and sif, the network_file argument must be
                         specified. Default: pc
@@ -113,7 +113,14 @@ optional arguments:
                         with the given value. This should only be used if the
                         goal is to deterministically reproduce a prior result
                         obtained with the same random seed.
-
+  --n2v_p N2V_P         If provided, the random walk is done using biased
+                        sampling according to the node2vec algorithm, with
+                        this parameter governing the "return" rate of the
+                        random walk.
+  --n2v_q N2V_Q         If provided, the random walk is done using biased
+                        sampling according to the node2vec algorithm, with
+                        this parameter governing the "in-out" rate of the
+                        random walk.
 ```
 
 
